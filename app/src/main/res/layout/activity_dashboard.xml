@@ -17,26 +17,33 @@
         android:layout_marginBottom="45dp">
 
     </android.support.v7.widget.RecyclerView>
-
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:orientation="horizontal">
-
-        <EditText
-            android:id="@+id/etMessage"
+        android:background="#c6c30c"
+        android:paddingTop="5dp">
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="Message" />
+            android:orientation="horizontal">
+            <EditText
+                android:id="@+id/etMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#c90dbc"
+                android:hint="Message" />
 
-        <ImageButton
-            android:id="@+id/btnSend"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:src="@drawable/ic_send_black_24dp" />
-    </LinearLayout>
+            <ImageButton
+                android:id="@+id/btnSend"
+                android:layout_width="45dp"
+                android:background="#c6c30c"
+                android:layout_height="45dp"
+                android:src="@drawable/ic_send_black_24dp" />
+        </LinearLayout>
+    </RelativeLayout>
+
 </RelativeLayout>

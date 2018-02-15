@@ -1,7 +1,9 @@
 package apps.example.com.firebasegroupchat.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,7 @@ import android.widget.TextView;
 import apps.example.com.firebasegroupchat.R;
 import apps.example.com.firebasegroupchat.models.Message;
 import apps.example.com.firebasegroupchat.models.MessageData;
+import apps.example.com.firebasegroupchat.utils.AllMethods;
 
 /**
  * Created by root on 15/2/18.
@@ -34,7 +37,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         Message message=messages.getMessage(position);
-        holder.tvTitle.setText(message.getName());
+        if(message.getName().equals(AllMethods.name)){
+            holder.tvTitle.setText("You");
+            holder.tvTitle.setGravity(Gravity.RIGHT);
+            holder.tvTitle.setBackgroundColor(Color.parseColor("#EF9E73"));
+        }
+        else {
+            holder.tvTitle.setText(message.getName());
+        }
         holder.tvMessage.setText(message.getMessage());
     }
 

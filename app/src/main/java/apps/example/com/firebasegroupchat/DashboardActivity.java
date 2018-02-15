@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,6 +28,7 @@ import apps.example.com.firebasegroupchat.adapter.MessageAdapter;
 import apps.example.com.firebasegroupchat.models.Message;
 import apps.example.com.firebasegroupchat.models.MessageData;
 import apps.example.com.firebasegroupchat.models.User;
+import apps.example.com.firebasegroupchat.utils.AllMethods;
 
 public class DashboardActivity extends AppCompatActivity implements View.OnClickListener, ValueEventListener {
 
@@ -69,6 +71,8 @@ public class DashboardActivity extends AppCompatActivity implements View.OnClick
             public void onDataChange(DataSnapshot dataSnapshot) {
                 u=dataSnapshot.getValue(User.class);
                 u.setUid(currentUser.getUid());
+                AllMethods.name=u.getName();
+                Log.e(TAG, "onDataChange: "+AllMethods.name );
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
