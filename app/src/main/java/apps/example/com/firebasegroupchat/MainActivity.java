@@ -1,5 +1,6 @@
 package apps.example.com.firebasegroupchat;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialog;
@@ -9,9 +10,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private static final String TAG = "MainActivity";
     EditText etEmail, etPassword;
     Button btnSignIn, btnSignUp;
+    TextView tvForgotPassword;
     FirebaseDatabase database;
     FirebaseAuth auth;
     User u;
@@ -43,9 +47,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         etPassword=findViewById(R.id.etPassword);
         btnSignIn=findViewById(R.id.btnSignIn);
         btnSignUp=findViewById(R.id.btnSignUp);
+        tvForgotPassword=findViewById(R.id.tvForgotPassword);
 
         btnSignIn.setOnClickListener(this);
         btnSignUp.setOnClickListener(this);
+        tvForgotPassword.setOnClickListener(this);
     }
 
     @Override
@@ -65,7 +71,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.btnSignUp: {
                 signUpDialog();
             } break;
+            case R.id.tvForgotPassword: {
+                forgotNow();
+            } break;
         }
+    }
+
+    private void forgotNow() {
+        final Dialog dialog=new Dialog(this);
+        dialog.setTitle("Forgot Password");
+        dialog.setContentView(R.layout.dialog_forgot);
+        final EditText etEmail=dialog.findViewById(R.id.etEmail);
+        Button btnResetNow=dialog.findViewById(R.id.btnResetNow);
+        Button btnCancel=dialog.findViewById(R.id.btnCancel);
+        dialog.show();
+        btnResetNow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                auth.sendPasswordResetEmail(etEmail.getText().toString()).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if(task.isSuccessful()){
+                            Toast.makeText(MainActivity.this, "Reset link sent to "+etEmail.getText().toString()+".", Toast.LENGTH_LONG).show();
+                        }
+                        else{
+                            Toast.makeText(MainActivity.this, "Faild to reset.", Toast.LENGTH_LONG).show();
+                        }
+                        dialog.dismiss();
+                    }
+
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(MainActivity.this, "Faild to reset.", Toast.LENGTH_LONG).show();
+                        dialog.dismiss();
+                    }
+                });
+            }
+        });
+
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
     }
 
     private void signUpDialog() {

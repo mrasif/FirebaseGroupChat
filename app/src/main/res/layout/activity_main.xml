@@ -38,5 +38,13 @@
             android:layout_height="wrap_content"
             android:text="Sign Up"/>
     </LinearLayout>
-
+    <TextView
+        android:id="@+id/tvForgotPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Forgot password."
+        android:padding="5dp"
+        android:gravity="right"
+        android:textStyle="bold"
+        android:textColor="#1026cc"/>
 </LinearLayout>
