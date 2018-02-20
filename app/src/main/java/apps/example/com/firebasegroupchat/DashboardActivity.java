@@ -16,8 +16,10 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
@@ -26,29 +28,27 @@ import java.util.List;
 
 import apps.example.com.firebasegroupchat.adapter.MessageAdapter;
 import apps.example.com.firebasegroupchat.models.Message;
-import apps.example.com.firebasegroupchat.models.MessageData;
 import apps.example.com.firebasegroupchat.models.User;
 import apps.example.com.firebasegroupchat.utils.AllMethods;
 
-public class DashboardActivity extends AppCompatActivity implements View.OnClickListener, ValueEventListener {
+public class DashboardActivity extends AppCompatActivity implements View.OnClickListener{
 
     private static final String TAG = "DashboardActivity";
     FirebaseAuth auth;
     FirebaseDatabase database;
+    DatabaseReference messagedb;
+    MessageAdapter adapter;
     User u;
+    List<Message> messages;
 
     RecyclerView rvMessage;
     EditText etMessage;
     ImageButton btnSend;
-    MessageData messages;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
-        messages=new MessageData();
 
         auth=FirebaseAuth.getInstance();
         database=FirebaseDatabase.getInstance();
@@ -58,6 +58,7 @@ public class DashboardActivity extends AppCompatActivity implements View.OnClick
         etMessage=findViewById(R.id.etMessage);
         btnSend=findViewById(R.id.btnSend);
         btnSend.setOnClickListener(this);
+        messages=new ArrayList<>();
     }
 
     @Override
@@ -80,7 +81,67 @@ public class DashboardActivity extends AppCompatActivity implements View.OnClick
             }
         });
 
-        database.getReference("messages").addValueEventListener(this);
+        messagedb=database.getReference("messages");
+        messagedb.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Message message=dataSnapshot.getValue(Message.class);
+                message.setKey(dataSnapshot.getKey());
+                messages.add(message);
+                displayMessages(messages);
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Message message=dataSnapshot.getValue(Message.class);
+                message.setKey(dataSnapshot.getKey());
+//                Toast.makeText(DashboardActivity.this, "Message changed...", Toast.LENGTH_SHORT).show();
+                List<Message> newMessages=new ArrayList<>();
+                for (Message m:messages){
+                    if(m.getKey().equals(message.getKey())){
+                        newMessages.add(message);
+                    }
+                    else{
+                        newMessages.add(m);
+                    }
+                }
+                messages=newMessages;
+                displayMessages(messages);
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                Message message=dataSnapshot.getValue(Message.class);
+                message.setKey(dataSnapshot.getKey());
+//                Toast.makeText(DashboardActivity.this, "Message deleted...", Toast.LENGTH_SHORT).show();
+                List<Message> newMessages=new ArrayList<>();
+                for (Message m:messages){
+                    if(!m.getKey().equals(message.getKey())){
+                        newMessages.add(m);
+                    }
+                }
+                messages=newMessages;
+                displayMessages(messages);
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void displayMessages(List<Message> messages) {
+        rvMessage.setLayoutManager(new LinearLayoutManager(DashboardActivity.this));
+        adapter=new MessageAdapter(DashboardActivity.this,messages,messagedb);
+        rvMessage.setAdapter(adapter);
+
     }
 
     @Override
@@ -103,9 +164,8 @@ public class DashboardActivity extends AppCompatActivity implements View.OnClick
     public void onClick(View view) {
         if(!TextUtils.isEmpty(etMessage.getText().toString())) {
             Message message = new Message(etMessage.getText().toString(), u.getName());
-            messages.addMessage(message);
             etMessage.setText("");
-            database.getReference("messages").setValue(messages);
+            messagedb.push().setValue(message);
         }
         else {
             Toast.makeText(this, "Please write message.", Toast.LENGTH_SHORT).show();
@@ -113,17 +173,8 @@ public class DashboardActivity extends AppCompatActivity implements View.OnClick
     }
 
     @Override
-    public void onDataChange(DataSnapshot dataSnapshot) {
-        MessageData messages=dataSnapshot.getValue(MessageData.class);
-        if(null!=messages){
-            this.messages=messages;
-            rvMessage.setLayoutManager(new LinearLayoutManager(this));
-            rvMessage.setAdapter(new MessageAdapter(this,this.messages));
-        }
-    }
-
-    @Override
-    public void onCancelled(DatabaseError databaseError) {
-
+    protected void onResume() {
+        super.onResume();
+        messages=new ArrayList<>();
     }
 }
